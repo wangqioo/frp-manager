@@ -1,12 +1,14 @@
 # FRP 隧道配置手册
 
-> 最后更新：2026-05-04
+> 最后更新：2026-05-04（新增 MacBook Pro SSH 隧道）
 
 ## 架构
 
 ```
 公网服务器 (frps) 150.158.146.192
 ├── 4060Ti-Server  192.168.1.39  → :6004
+├── MacBook Pro    动态 DHCP     → :6104
+├── 树莓派         动态 DHCP     → :6250
 └── Orin Nano      192.168.1.9
 ```
 
@@ -42,6 +44,37 @@
 
 ---
 
+## MacBook Pro（动态 DHCP）
+
+- 配置：`~/.config/frp/frpc.toml`
+- 服务：`launchctl list | grep frpc`
+- 重启：`launchctl unload ~/Library/LaunchAgents/com.frp.frpc.plist && launchctl load ~/Library/LaunchAgents/com.frp.frpc.plist`
+- 日志：`tail -f ~/.config/frp/frpc.log`
+
+### 端口分配
+
+| 公网端口 | 服务 | 本地端口 |
+|---------|------|---------|
+| 6104 | SSH | 22 |
+
+---
+
+## 树莓派（动态 DHCP）
+
+- 配置：`/opt/frp/frpc.toml`
+- 服务：`sudo systemctl status frpc`
+- 重启：`sudo systemctl restart frpc`
+- 日志：`sudo journalctl -u frpc -f`
+- SSH 备用（cpolar）：`ssh -p 21585 wq@1.tcp.cpolar.cn`
+
+### 端口分配
+
+| 公网端口 | 服务 | 本地端口 |
+|---------|------|---------|
+| 6250 | SSH | 22 |
+
+---
+
 ## Orin Nano（192.168.1.9）
 
 - 账号：`nvidia` / 密码：`nvidia`
@@ -66,6 +99,12 @@ curl -s -u admin:DqtuuVMBIDUGPlMmxik9rlHc \
 
 # SSH 登录 4060Ti-Server
 ssh -p 6004 wq@150.158.146.192
+
+# SSH 登录 MacBook Pro
+ssh -p 6104 wq@150.158.146.192
+
+# SSH 登录树莓派（frp）
+ssh -p 6250 wq@150.158.146.192
 
 # Orin Nano 重启 frpc
 ssh nvidia@192.168.1.9 "echo 'nvidia' | sudo -S systemctl restart frpc"

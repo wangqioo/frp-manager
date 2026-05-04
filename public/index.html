@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRP Manager</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  .header { background: #1e293b; padding: 20px 32px; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 20px; font-weight: 600; color: #f1f5f9; }
+  .status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #94a3b8; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .stat-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+  .stat-card .label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .stat-card .value { font-size: 28px; font-weight: 700; color: #f1f5f9; }
+  .stat-card .value.sm { font-size: 15px; padding-top: 6px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 16px; font-weight: 600; color: #f1f5f9; }
+  .toolbar { display: flex; align-items: center; gap: 12px; }
+  .btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: all .15s; }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-danger { background: #ef4444; color: #fff; padding: 4px 10px; font-size: 12px; }
+  .btn-danger:hover { background: #dc2626; }
+  .filter-tabs { display: flex; gap: 6px; }
+  .filter-tab { padding: 5px 14px; border-radius: 20px; border: 1px solid #334155; background: transparent; color: #94a3b8; font-size: 12px; cursor: pointer; transition: all .15s; }
+  .filter-tab:hover { border-color: #475569; color: #e2e8f0; }
+  .filter-tab.active { border-color: transparent; color: #fff; }
+  .filter-tab.active.all      { background: #334155; }
+  .filter-tab.active.dev-4060ti { background: #1d4ed8; }
+  .filter-tab.active.dev-mac    { background: #7c3aed; }
+  .filter-tab.active.dev-orin   { background: #c2410c; }
+  .filter-tab.active.dev-unknown { background: #475569; }
+  .filter-tab.active.dev-rpi    { background: #15803d; }
+  .filter-tab.active.dev-lab    { background: #b45309; }
+  .table { background: #1e293b; border: 1px solid #334155; border-radius: 12px; overflow: hidden; }
+  .table table { width: 100%; border-collapse: collapse; }
+  .table th { padding: 11px 16px; text-align: left; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #334155; }
+  .table td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid #1a2535; }
+  .table tr:last-child td { border-bottom: none; }
+  .table tr:hover td { background: #1e2d42; }
+  .table tr td:first-child { border-left: 3px solid transparent; padding-left: 13px; }
+  .table tr.dev-4060ti td:first-child { border-left-color: #3b82f6; }
+  .table tr.dev-mac     td:first-child { border-left-color: #a855f7; }
+  .table tr.dev-orin    td:first-child { border-left-color: #f97316; }
+  .table tr.dev-unknown td:first-child { border-left-color: #475569; }
+  .table tr.dev-rpi     td:first-child { border-left-color: #22c55e; }
+  .table tr.dev-lab     td:first-child { border-left-color: #f59e0b; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .badge-green { background: #166534; color: #4ade80; }
+  .badge-red   { background: #7f1d1d; color: #f87171; }
+  .badge-blue  { background: #1e3a5f; color: #60a5fa; }
+  .badge.dev-4060ti { background: #1e3a5f; color: #60a5fa; }
+  .badge.dev-mac    { background: #3b1f6e; color: #c084fc; }
+  .badge.dev-orin   { background: #431407; color: #fb923c; }
+  .badge.dev-unknown { background: #1e2535; color: #94a3b8; }
+  .badge.dev-rpi     { background: #14532d; color: #4ade80; }
+  .badge.dev-lab     { background: #451a03; color: #fbbf24; }
+  code { background: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+  .empty { text-align: center; padding: 40px; color: #475569; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 28px; width: 460px; max-width: 92vw; }
+  .modal h3 { margin-bottom: 20px; font-size: 16px; color: #f1f5f9; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+  .form-group input, .form-group select { width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 13px; outline: none; }
+  .form-group input:focus, .form-group select:focus { border-color: #3b82f6; }
+  .hint { font-size: 11px; color: #475569; margin-top: 4px; }
+  .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .btn-cancel { background: #334155; color: #e2e8f0; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 12px 20px; font-size: 13px; z-index: 999; display: none; }
+  .toast.show { display: block; animation: fadeIn .3s; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .refresh-info { font-size: 12px; color: #475569; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚡ FRP Manager</h1>
+  <div class="status">
+    <div class="dot"></div>
+    <span id="server-info">连接中...</span>
+    <span class="refresh-info" id="last-refresh"></span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="stats">
+    <div class="stat-card"><div class="label">在线隧道</div><div class="value" id="stat-online">-</div></div>
+    <div class="stat-card"><div class="label">离线隧道</div><div class="value" id="stat-offline">-</div></div>
+    <div class="stat-card"><div class="label">公网服务器</div><div class="value sm">150.158.146.192</div></div>
+    <div class="stat-card"><div class="label">frps 版本</div><div class="value sm" id="stat-version">-</div></div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">隧道列表</div>
+    <div class="toolbar">
+      <div class="filter-tabs" id="filter-tabs"></div>
+      <button class="btn btn-primary" onclick="document.getElementById('tunnel-modal').classList.add('show')">+ 新建隧道</button>
+    </div>
+  </div>
+
+  <div class="table">
+    <table>
+      <thead>
+        <tr>
+          <th>名称</th>
+          <th>设备</th>
+          <th>类型</th>
+          <th>本地地址</th>
+          <th>公网端口</th>
+          <th>状态</th>
+          <th>今日流量 ↓/↑</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="proxies-tbody">
+        <tr><td colspan="8" class="empty">加载中...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- 新建隧道 Modal -->
+<div class="modal-overlay" id="tunnel-modal">
+  <div class="modal">
+    <h3>新建隧道</h3>
+    <div class="form-group">
+      <label>隧道名称</label>
+      <input type="text" id="t-name" placeholder="e.g. 4060ti-myapp">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>本地端口</label>
+        <input type="number" id="t-local" placeholder="e.g. 3000">
+      </div>
+      <div class="form-group">
+        <label>公网端口</label>
+        <input type="number" id="t-remote" placeholder="e.g. 6050" oninput="checkPort(this)">
+        <div class="hint" id="port-hint">允许范围：6000-6299 · 7001-7999 · 10000-20000</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>目标设备</label>
+      <select id="t-device"></select>
+    </div>
+    <div class="form-group">
+      <label>协议类型</label>
+      <select id="t-type"><option value="tcp">TCP</option><option value="http">HTTP</option></select>
+      <div class="hint">通常选 TCP 即可；HTTP 仅在需要按域名分流时使用</div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-cancel" onclick="document.getElementById('tunnel-modal').classList.remove('show')">取消</button>
+      <button class="btn btn-primary" onclick="addTunnel()">创建并重启 frpc</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let managedTunnelNames = new Set(); // 所有受管设备的隧道名
+let usedRemotePorts = new Set();
+let allProxies = [];
+let activeFilter = 'all';
+let devicesConfig = [];
+
+const ALLOWED_RANGES = [[6000,6299],[7001,7999],[10000,20000]];
+
+const DEVICES = {
+  '4060ti': { label: '4060Ti', cls: 'dev-4060ti' },
+  'mac':    { label: 'Mac',    cls: 'dev-mac'    },
+  'orin':   { label: 'Orin',   cls: 'dev-orin'   },
+  'rpi':    { label: 'RPi',    cls: 'dev-rpi'    },
+  'lab':    { label: 'Lab',   cls: 'dev-lab'    },
+};
+
+function getDevice(name) {
+  for (const [prefix, info] of Object.entries(DEVICES)) {
+    if (name === prefix || name.startsWith(prefix + '-')) return info;
+  }
+  return { label: '?', cls: 'dev-unknown' };
+}
+
+function isPortAllowed(p) {
+  return ALLOWED_RANGES.some(([s,e]) => p >= s && p <= e);
+}
+
+function checkPort(input) {
+  const p = parseInt(input.value);
+  const hint = document.getElementById('port-hint');
+  if (!p) { hint.style.color = '#475569'; hint.textContent = '允许范围：6000-6299 · 7001-7999 · 10000-20000'; return; }
+  if (!isPortAllowed(p)) {
+    hint.style.color = '#f87171';
+    hint.textContent = `⚠ 端口 ${p} 不在允许范围内`;
+  } else if (usedRemotePorts.has(p)) {
+    hint.style.color = '#f87171';
+    hint.textContent = `⚠ 端口 ${p} 已被占用`;
+  } else {
+    hint.style.color = '#4ade80';
+    hint.textContent = `✓ 端口 ${p} 可用`;
+  }
+}
+
+function toast(msg, ok = true) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.borderColor = ok ? '#22c55e' : '#ef4444';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function fmt(b) {
+  if (!b) return '-';
+  if (b < 1024) return b + 'B';
+  if (b < 1048576) return (b / 1024).toFixed(1) + 'K';
+  return (b / 1048576).toFixed(1) + 'M';
+}
+
+function renderFilterTabs(proxies) {
+  const counts = { all: proxies.length };
+  for (const p of proxies) {
+    const cls = getDevice(p.name).cls;
+    counts[cls] = (counts[cls] || 0) + 1;
+  }
+  const defs = [
+    { key: 'all',         label: '全部',   cls: 'all'         },
+    { key: 'dev-4060ti',  label: '4060Ti', cls: 'dev-4060ti'  },
+    { key: 'dev-mac',     label: 'Mac',    cls: 'dev-mac'     },
+    { key: 'dev-orin',    label: 'Orin',   cls: 'dev-orin'    },
+    { key: 'dev-rpi',     label: 'RPi',    cls: 'dev-rpi'     },
+    { key: 'dev-lab',     label: 'Lab',    cls: 'dev-lab'     },
+    { key: 'dev-unknown', label: '?',      cls: 'dev-unknown' },
+  ].filter(t => t.key === 'all' || counts[t.key]);
+
+  document.getElementById('filter-tabs').innerHTML = defs.map(t =>
+    `<button class="filter-tab ${t.cls}${activeFilter === t.key ? ' active' : ''}"
+      onclick="setFilter('${t.key}')">${t.label} <span style="opacity:.6">${counts[t.key] || 0}</span></button>`
+  ).join('');
+}
+
+function setFilter(key) {
+  activeFilter = key;
+  renderFilterTabs(allProxies);
+  renderTable();
+}
+
+function renderTable() {
+  const proxies = activeFilter === 'all'
+    ? allProxies
+    : allProxies.filter(p => getDevice(p.name).cls === activeFilter);
+
+  const tbody = document.getElementById('proxies-tbody');
+  if (!proxies.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">暂无隧道</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = proxies.map(p => {
+    const conf = p.conf || {};
+    const dev = getDevice(p.name);
+    const local = conf.localIP ? `${conf.localIP}:${conf.localPort}` : '-';
+    const port = conf.remotePort;
+    const remoteCell = port
+      ? `<a href="http://150.158.146.192:${port}" target="_blank" style="color:#60a5fa;text-decoration:none"><code>:${port}</code></a>`
+      : '-';
+    const status = p.status === 'online'
+      ? '<span class="badge badge-green">在线</span>'
+      : '<span class="badge badge-red">离线</span>';
+    const isManaged = managedTunnelNames.has(p.name);
+    const del = isManaged
+      ? `<button class="btn btn-danger" onclick="deleteTunnel('${p.name}')">删除</button>`
+      : '';
+    return `<tr class="${dev.cls}">
+      <td>${p.name}</td>
+      <td><span class="badge ${dev.cls}">${dev.label}</span></td>
+      <td><span class="badge badge-blue">${p.type || 'tcp'}</span></td>
+      <td><code>${local}</code></td>
+      <td>${remoteCell}</td>
+      <td>${status}</td>
+      <td>${fmt(p.todayTrafficIn)} / ${fmt(p.todayTrafficOut)}</td>
+      <td>${del}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadDevicesConfig() {
+  try {
+    const r = await fetch('/api/devices-config');
+    devicesConfig = await r.json();
+    const sel = document.getElementById('t-device');
+    if (sel) {
+      sel.innerHTML = devicesConfig.map(d =>
+        `<option value="${d.id}">${d.name}</option>`
+      ).join('');
+    }
+  } catch (e) { devicesConfig = []; }
+}
+
+async function loadManagedTunnels() {
+  try {
+    const r = await fetch('/api/tunnels');
+    const data = await r.json(); // { deviceId: [tunnels] }
+    managedTunnelNames = new Set(
+      Object.values(data).flat().map(t => t.name)
+    );
+  } catch (e) { managedTunnelNames = new Set(); }
+}
+
+async function loadProxies() {
+  const r = await fetch('/api/proxies');
+  allProxies = await r.json();
+  const online = allProxies.filter(p => p.status === 'online').length;
+  document.getElementById('stat-online').textContent = online;
+  document.getElementById('stat-offline').textContent = allProxies.length - online;
+  usedRemotePorts = new Set(allProxies.map(p => p.conf && p.conf.remotePort).filter(Boolean).map(Number));
+  renderFilterTabs(allProxies);
+  renderTable();
+}
+
+async function loadServerInfo() {
+  try {
+    const r = await fetch('/api/serverinfo');
+    const info = await r.json();
+    document.getElementById('stat-version').textContent = `v${info.version}`;
+    document.getElementById('server-info').textContent = `frps v${info.version}`;
+  } catch (e) {
+    document.getElementById('server-info').textContent = '连接失败';
+  }
+}
+
+async function addTunnel() {
+  const data = {
+    name: document.getElementById('t-name').value.trim(),
+    localPort: document.getElementById('t-local').value,
+    remotePort: document.getElementById('t-remote').value,
+    type: document.getElementById('t-type').value,
+    device: document.getElementById('t-device').value,
+  };
+  if (!data.name || !data.localPort || !data.remotePort) { toast('请填写所有字段', false); return; }
+  if (!isPortAllowed(parseInt(data.remotePort))) { toast(`端口 ${data.remotePort} 不在允许范围内`, false); return; }
+  if (usedRemotePorts.has(parseInt(data.remotePort))) { toast(`端口 ${data.remotePort} 已被占用`, false); return; }
+  const r = await fetch('/api/tunnels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+  const res = await r.json();
+  if (res.error) { toast('错误：' + res.error, false); return; }
+  toast('隧道已创建，frpc 已重启');
+  document.getElementById('tunnel-modal').classList.remove('show');
+  setTimeout(refresh, 2000);
+}
+
+async function deleteTunnel(name) {
+  if (!confirm(`确认删除隧道 "${name}"？frpc 将自动重启`)) return;
+  const r = await fetch(`/api/tunnels/${name}`, { method: 'DELETE' });
+  const res = await r.json();
+  if (res.error) { toast('错误：' + res.error, false); return; }
+  toast('已删除，frpc 已重启');
+  setTimeout(refresh, 2000);
+}
+
+async function refresh() {
+  await Promise.all([loadManagedTunnels(), loadDevicesConfig()]);
+  await Promise.all([loadProxies(), loadServerInfo()]);
+  document.getElementById('last-refresh').textContent = '· ' + new Date().toLocaleTimeString();
+}
+
+refresh();
+setInterval(refresh, 10000);
+</script>
+</body>
+</html>

@@ -9,7 +9,8 @@
 | 公网服务器 | 150.158.146.192 | — | 上海腾讯云，运行 frps |
 | 4060Ti-Server | 192.168.1.39 | :6004 | RTX 4060 Ti，主力 AI 开发机 |
 | MacBook Pro | 动态 DHCP | :6104 | 开发用 Mac，frpc via Homebrew |
-| 树莓派 | 动态 DHCP | :6250 | 边缘设备，SSH via cpolar + frp |
+| 树莓派 | 动态 DHCP | :6250 | 跳板机，SSH via cpolar + frp |
+| 实验室服务器 | 10.19.138.86 | :6260 | via 树莓派跳转，frpc 直连 frps |
 | Orin Nano | 192.168.1.9 | — | 边缘推理设备 |
 
 ## 文档

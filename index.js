@@ -62,7 +62,7 @@ function sshRun(deviceId, cmd) {
 
 function readToml(deviceId) {
   const dev = MANAGED_DEVICES[deviceId];
-  if (dev.isLocal) return fs.readFileSync(dev.frpcToml, 'utf8');
+  if (dev.isLocal) return execSync(`sudo cat ${dev.frpcToml}`, { encoding: 'utf8' });
   return sshRun(deviceId, `cat ${dev.frpcToml}`);
 }
 
@@ -70,7 +70,7 @@ function writeToml(deviceId, content) {
   const dev = MANAGED_DEVICES[deviceId];
   const b64 = Buffer.from(content).toString('base64');
   if (dev.isLocal) {
-    fs.writeFileSync(dev.frpcToml, content);
+    execSync(`echo '${b64}' | base64 -d | sudo tee ${dev.frpcToml}`, { encoding: 'utf8' });
   } else {
     sshRun(deviceId, `echo '${b64}' | base64 -d > ${dev.frpcToml}`);
   }

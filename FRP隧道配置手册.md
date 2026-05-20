@@ -123,6 +123,12 @@
 - 服务：`systemctl status frpc`
 - 重启：`systemctl restart frpc`
 - 日志：`journalctl -u frpc -f`
+- 显示：内置 DSI 屏原生 `800x1280`，Xorg/XFCE 旋转为横屏 `1280x800 right`
+- 登录界面横屏：`/usr/local/bin/rotate-k7-display-lightdm.sh`
+- 桌面横屏：`/home/linaro/.local/bin/rotate-k7-display.sh`
+- 触摸校准：`/etc/X11/xorg.conf.d/99-k7-touch-rotate.conf`
+- 触摸设备：`goodix-ts`
+- 触摸矩阵：`0 1 0 -1 0 1 0 0 1`
 
 ### 端口分配
 

@@ -40,6 +40,13 @@ const MANAGED_DEVICES = {
     frpcToml: '/opt/frp/frpc.toml',
     restartCmd: 'sudo systemctl restart frpc',
   },
+  walnutpi: {
+    name: 'WalnutPi',
+    prefix: 'walnutpi',
+    ssh: { host: '150.158.146.192', port: 6230, user: 'root' },
+    frpcToml: '/opt/frp/frpc.toml',
+    restartCmd: 'systemctl restart frpc',
+  },
 };
 
 function getDeviceIdByName(tunnelName) {

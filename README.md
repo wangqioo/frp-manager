@@ -5,7 +5,7 @@
 ## 功能
 
 - 实时查看 frps 上所有在线隧道（状态、流量、连接数）
-- 按设备筛选隧道（全部 / 4060Ti / Mac / RPi / Lab / Orin / K7）
+- 按设备筛选隧道（全部 / 4060Ti / Mac / RPi / Lab / Orin / K7 / WalnutPi）
 - 颜色标识区分不同设备来源
 - 一键在任意受管设备上创建 / 删除隧道（自动 SSH 操作远程 frpc.toml 并重启服务）
 - 服务器信息总览（版本、连接数、流量统计）
@@ -19,7 +19,8 @@
   ├── SSH → MacBook Pro  (:6104)
   ├── SSH → 树莓派        (:6250)
   ├── SSH → 实验室服务器  (:6260)
-  └── SSH → KICKPI K7    (:6276)
+  ├── SSH → KICKPI K7    (:6276)
+  └── SSH → WalnutPi     (:6230)
 ```
 
 frp-manager 部署在 4060Ti 上，通过 SSH 密钥免密登录其余设备，直接读写远程 `frpc.toml` 并重启 frpc 服务。
@@ -33,6 +34,7 @@ frp-manager 部署在 4060Ti 上，通过 SSH 密钥免密登录其余设备，�
 | `rpi` | 树莓派 | 6250 | `/opt/frp/frpc.toml` |
 | `lab` | 实验室服务器 | 6260 | `/opt/frp/frpc.toml` |
 | `k7` | KICKPI K7 / RK3576 | 6276 | `/opt/frp/frpc.toml` |
+| `walnutpi` | WalnutPi | 6230 | `/opt/frp/frpc.toml` |
 
 ## 前置条件
 

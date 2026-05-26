@@ -47,6 +47,13 @@ const MANAGED_DEVICES = {
     frpcToml: '/opt/frp/frpc.toml',
     restartCmd: 'systemctl restart frpc',
   },
+  taishanpi: {
+    name: 'TaishanPi-3M RK3576',
+    prefix: 'taishanpi',
+    ssh: { host: '150.158.146.192', port: 6277, user: 'root' },
+    frpcToml: '/opt/frp/frpc.toml',
+    restartCmd: 'systemctl restart frpc',
+  },
 };
 
 function getDeviceIdByName(tunnelName) {

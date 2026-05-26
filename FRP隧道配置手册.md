@@ -1,6 +1,6 @@
 # FRP 隧道配置手册
 
-> 最后更新：2026-05-21（恢复 WalnutPi SSH 隧道）
+> 最后更新：2026-05-27（新增 TaishanPi-3M RK3576 SSH 隧道）
 
 ## 架构
 
@@ -12,7 +12,8 @@
 ├── 实验室服务器   10.19.138.86  → :6260
 ├── Orin Nano      192.168.1.9
 ├── KICKPI K7      192.168.1.42  → :6276
-└── WalnutPi       192.168.1.30  → :6230
+├── WalnutPi       192.168.1.30  → :6230
+└── TaishanPi-3M   192.168.1.38  → :6277
 ```
 
 ---
@@ -158,6 +159,27 @@
 
 ---
 
+## TaishanPi-3M RK3576（192.168.1.38）
+
+- 板卡：`LCKFB TaishanPi 3M RK3576 Board`
+- 主机名：`TaishanPi-3M`
+- 系统：`Debian GNU/Linux 12 (bookworm)`
+- 架构：`aarch64 / arm64`
+- SSH 用户：`root` 或 `linaro`
+- 配置：`/opt/frp/frpc.toml`
+- 二进制：`/usr/local/bin/frpc`
+- 日志：`/var/log/frp/frpc.log`
+- 服务：`systemctl status frpc`
+- 重启：`systemctl restart frpc`
+
+### 端口分配
+
+| 公网端口 | 服务 | 本地端口 |
+|---------|------|---------|
+| 6277 | SSH | 22 |
+
+---
+
 ## 常用命令
 
 ```bash
@@ -179,6 +201,9 @@ ssh -p 6276 root@150.158.146.192
 
 # SSH 登录 WalnutPi
 ssh -p 6230 root@150.158.146.192
+
+# SSH 登录 TaishanPi-3M RK3576
+ssh -p 6277 root@150.158.146.192
 
 # Orin Nano 重启 frpc
 ssh nvidia@192.168.1.9 "echo 'nvidia' | sudo -S systemctl restart frpc"

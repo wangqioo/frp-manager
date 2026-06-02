@@ -1,6 +1,6 @@
 # FRP 隧道配置手册
 
-> 最后更新：2026-05-27（新增 TaishanPi-3M RK3576 SSH 隧道）
+> 最后更新：2026-06-02（新增 Taishan Macintosh 灰色版 SSH 隧道）
 
 ## 架构
 
@@ -13,7 +13,8 @@
 ├── Orin Nano      192.168.1.9
 ├── KICKPI K7      192.168.1.42  → :6276
 ├── WalnutPi       192.168.1.30  → :6230
-└── TaishanPi-3M   192.168.1.38  → :6277
+├── TaishanPi-3M   192.168.1.38  → :6277
+└── Taishan Gray   192.168.1.49  → :6278
 ```
 
 ---
@@ -180,6 +181,29 @@
 
 ---
 
+## Taishan Macintosh 灰色版（192.168.1.49）
+
+- 主机名：`taishan-gray`
+- 系统：`Debian GNU/Linux 10 (buster)`
+- 架构：`aarch64 / arm64`
+- ADB 序列号：`c0d01bd2c4819972`
+- SSH 用户：`root` 或 `linaro`
+- WiFi：`1-306`（由透明版 `1-306_5G` 配置派生）
+- 配置：`/opt/frp/frpc.toml`
+- 二进制：`/usr/local/bin/frpc`
+- 版本：`frpc 0.68.1`
+- 日志：`/var/log/frp/frpc.log`
+- 服务：`systemctl status frpc`
+- 重启：`systemctl restart frpc`
+
+### 端口分配
+
+| 公网端口 | 服务 | 本地端口 |
+|---------|------|---------|
+| 6278 | SSH | 22 |
+
+---
+
 ## 常用命令
 
 ```bash
@@ -204,6 +228,9 @@ ssh -p 6230 root@150.158.146.192
 
 # SSH 登录 TaishanPi-3M RK3576
 ssh -p 6277 root@150.158.146.192
+
+# SSH 登录 Taishan Macintosh 灰色版
+ssh -p 6278 root@150.158.146.192
 
 # Orin Nano 重启 frpc
 ssh nvidia@192.168.1.9 "echo 'nvidia' | sudo -S systemctl restart frpc"

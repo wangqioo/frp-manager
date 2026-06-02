@@ -61,6 +61,13 @@ const MANAGED_DEVICES = {
     frpcToml: '/opt/frp/frpc.toml',
     restartCmd: 'systemctl restart frpc',
   },
+  taishanblack: {
+    name: 'Taishan Macintosh Black',
+    prefix: 'taishan-black',
+    ssh: { host: '150.158.146.192', port: 6279, user: 'root' },
+    frpcToml: '/opt/frp/frpc.toml',
+    restartCmd: 'systemctl restart frpc',
+  },
 };
 
 function getDeviceIdByName(tunnelName) {

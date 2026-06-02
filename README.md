@@ -22,7 +22,8 @@
   ├── SSH → KICKPI K7    (:6276)
   ├── SSH → WalnutPi     (:6230)
   ├── SSH → TaishanPi-3M (:6277)
-  └── SSH → Taishan Gray (:6278)
+  ├── SSH → Taishan Gray (:6278)
+  └── SSH → Taishan Black (:6279)
 ```
 
 frp-manager 部署在 4060Ti 上，通过 SSH 密钥免密登录其余设备，直接读写远程 `frpc.toml` 并重启 frpc 服务。
@@ -39,6 +40,7 @@ frp-manager 部署在 4060Ti 上，通过 SSH 密钥免密登录其余设备，�
 | `walnutpi` | WalnutPi | 6230 | `/opt/frp/frpc.toml` |
 | `taishanpi` | TaishanPi-3M RK3576 | 6277 | `/opt/frp/frpc.toml` |
 | `taishangray` | Taishan Macintosh Gray | 6278 | `/opt/frp/frpc.toml` |
+| `taishanblack` | Taishan Macintosh Black | 6279 | `/opt/frp/frpc.toml` |
 
 ## 前置条件
 

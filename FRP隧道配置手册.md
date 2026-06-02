@@ -1,6 +1,6 @@
 # FRP 隧道配置手册
 
-> 最后更新：2026-06-02（新增 Taishan Macintosh 灰色版 SSH 隧道）
+> 最后更新：2026-06-02（新增 Taishan Macintosh 亮黑版 SSH 隧道）
 
 ## 架构
 
@@ -14,7 +14,8 @@
 ├── KICKPI K7      192.168.1.42  → :6276
 ├── WalnutPi       192.168.1.30  → :6230
 ├── TaishanPi-3M   192.168.1.38  → :6277
-└── Taishan Gray   192.168.1.49  → :6278
+├── Taishan Gray   192.168.1.49  → :6278
+└── Taishan Black  192.168.1.33  → :6279
 ```
 
 ---
@@ -206,6 +207,30 @@
 
 ---
 
+## Taishan Macintosh 亮黑版（192.168.1.33）
+
+- 主机名：`taishan-black`
+- 系统：`Ubuntu 20.04.6 LTS (Focal Fossa)`
+- 架构：`aarch64 / arm64`
+- ADB 序列号：`f307766be1702f47`
+- SSH 用户：`root` 或 `lckfb`
+- WiFi：`1-306`
+- 显示：内置 DSI 屏 `480x360`，当前 Xorg 使用 `modesetting` + `glamor`；未观察到灰色版的 `POST_BUF_EMPTY` 问题。
+- 配置：`/opt/frp/frpc.toml`
+- 二进制：`/usr/local/bin/frpc`
+- 版本：`frpc 0.68.1`
+- 日志：`/var/log/frp/frpc.log`
+- 服务：`systemctl status frpc`
+- 重启：`systemctl restart frpc`
+
+### 端口分配
+
+| 公网端口 | 服务 | 本地端口 |
+|---------|------|---------|
+| 6279 | SSH | 22 |
+
+---
+
 ## 常用命令
 
 ```bash
@@ -233,6 +258,9 @@ ssh -p 6277 root@150.158.146.192
 
 # SSH 登录 Taishan Macintosh 灰色版
 ssh -p 6278 root@150.158.146.192
+
+# SSH 登录 Taishan Macintosh 亮黑版
+ssh -p 6279 root@150.158.146.192
 
 # Orin Nano 重启 frpc
 ssh nvidia@192.168.1.9 "echo 'nvidia' | sudo -S systemctl restart frpc"

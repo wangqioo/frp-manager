@@ -38,6 +38,7 @@
   .filter-tab.active.dev-rpi    { background: #15803d; }
   .filter-tab.active.dev-lab    { background: #b45309; }
   .filter-tab.active.dev-taishan-gray { background: #64748b; }
+  .filter-tab.active.dev-taishan-black { background: #111827; }
   .table { background: #1e293b; border: 1px solid #334155; border-radius: 12px; overflow: hidden; }
   .table table { width: 100%; border-collapse: collapse; }
   .table th { padding: 11px 16px; text-align: left; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #334155; }
@@ -52,6 +53,7 @@
   .table tr.dev-rpi     td:first-child { border-left-color: #22c55e; }
   .table tr.dev-lab     td:first-child { border-left-color: #f59e0b; }
   .table tr.dev-taishan-gray td:first-child { border-left-color: #94a3b8; }
+  .table tr.dev-taishan-black td:first-child { border-left-color: #111827; }
   .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
   .badge-green { background: #166534; color: #4ade80; }
   .badge-red   { background: #7f1d1d; color: #f87171; }
@@ -63,6 +65,7 @@
   .badge.dev-rpi     { background: #14532d; color: #4ade80; }
   .badge.dev-lab     { background: #451a03; color: #fbbf24; }
   .badge.dev-taishan-gray { background: #334155; color: #cbd5e1; }
+  .badge.dev-taishan-black { background: #020617; color: #e5e7eb; }
   code { background: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; }
   .empty { text-align: center; padding: 40px; color: #475569; }
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; align-items: center; justify-content: center; }
@@ -186,6 +189,7 @@ const DEVICES = {
   'rpi':    { label: 'RPi',    cls: 'dev-rpi'    },
   'lab':    { label: 'Lab',   cls: 'dev-lab'    },
   'taishan-gray': { label: 'Gray', cls: 'dev-taishan-gray' },
+  'taishan-black': { label: 'Black', cls: 'dev-taishan-black' },
 };
 
 function getDevice(name) {
@@ -244,6 +248,7 @@ function renderFilterTabs(proxies) {
     { key: 'dev-rpi',     label: 'RPi',    cls: 'dev-rpi'     },
     { key: 'dev-lab',     label: 'Lab',    cls: 'dev-lab'     },
     { key: 'dev-taishan-gray', label: 'Gray', cls: 'dev-taishan-gray' },
+    { key: 'dev-taishan-black', label: 'Black', cls: 'dev-taishan-black' },
     { key: 'dev-unknown', label: '?',      cls: 'dev-unknown' },
   ].filter(t => t.key === 'all' || counts[t.key]);
 

@@ -189,6 +189,8 @@
 - ADB 序列号：`c0d01bd2c4819972`
 - SSH 用户：`root` 或 `linaro`
 - WiFi：`1-306`（由透明版 `1-306_5G` 配置派生）
+- 显示：内置 DSI 屏 `480x360`，Xorg 使用 `fbdev` 驱动；配置文件 `/etc/X11/xorg.conf.d/20-modesetting.conf`
+- 备注：从 `modesetting` 热切到 `fbdev` 可能失败，需冷启动后生效；`FBIOPUTCMAP` 日志与透明版一致，属于非致命噪声。
 - 配置：`/opt/frp/frpc.toml`
 - 二进制：`/usr/local/bin/frpc`
 - 版本：`frpc 0.68.1`

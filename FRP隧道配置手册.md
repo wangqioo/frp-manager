@@ -1,6 +1,6 @@
 # FRP 隧道配置手册
 
-> 最后更新：2026-06-02（新增 Taishan Macintosh 亮黑版 SSH 隧道）
+> 最后更新：2026-08-03（新增 deepmemo-001 CIX P1 SSH 隧道）
 
 ## 架构
 
@@ -15,7 +15,8 @@
 ├── WalnutPi       192.168.1.30  → :6230
 ├── TaishanPi-3M   192.168.1.38  → :6277
 ├── Taishan Gray   192.168.1.49  → :6278
-└── Taishan Black  192.168.1.33  → :6279
+├── Taishan Black  192.168.1.33  → :6279
+└── deepmemo-001   192.168.31.32 → :6280
 ```
 
 ---
@@ -231,6 +232,42 @@
 
 ---
 
+## deepmemo-001（192.168.31.32）
+
+- 主机名：`deepmemo-001`
+- SoC：`CIX P1 / SKY1 (CIXH502F)`，12 核（4× Cortex-A720 大核 @2.6GHz + 8× Cortex-A520 小核 @1.8GHz）
+- GPU：`Mali Immortalis-G720`；NPU：周易 ~30 TOPS（无用户态驱动，暂不可用）
+- 内存：`8GB LPDDR5-6000`（128-bit，理论 96 GB/s，实测 ~40 GB/s）
+- 架构：`aarch64 / arm64`
+- SSH 用户：`tianxi`
+- 配置：`/opt/frp/frpc.toml`
+- 二进制：`/usr/local/bin/frpc`
+- 版本：`frpc 0.68.1`
+- 日志：`/var/log/frp/frpc.log`
+- 服务：`sudo systemctl status frpc`
+- 重启：`sudo systemctl restart frpc`
+
+### 稳定性加固
+
+- `frpc.toml`：`heartbeatInterval=30`、`heartbeatTimeout=90`、`loginFailExit=false`、`dialServerKeepalive=7200`
+- systemd override：`Restart=always`、`RestartSec=10`、`StartLimitIntervalSec=0`（掉线自动重连，实测 kill -9 后 ~11s 恢复）
+- sshd 保活：`ClientAliveInterval 60`、`ClientAliveCountMax 3`
+- 开机自动设 CPU performance governor（`cpu-performance.service`）
+
+### 本地大模型（ollama）
+
+- ollama 0.32.5，Qwen2.5-7B / 3B（Q4_K_M GGUF）
+- 关键：CPU 推理需锁定大核，Modelfile 内 `PARAMETER num_thread 6`（仅 4 个大核 + 冗余；用满 12 核会被小核拖慢 3-6 倍）
+- 实测：3B ≈ 16.7 tok/s，7B ≈ 8.0 tok/s（已接近内存带宽上限）
+
+### 端口分配
+
+| 公网端口 | 服务 | 本地端口 |
+|---------|------|---------|
+| 6280 | SSH | 22 |
+
+---
+
 ## 常用命令
 
 ```bash
@@ -261,6 +298,9 @@ ssh -p 6278 root@150.158.146.192
 
 # SSH 登录 Taishan Macintosh 亮黑版
 ssh -p 6279 root@150.158.146.192
+
+# SSH 登录 deepmemo-001（CIX P1）
+ssh -p 6280 tianxi@150.158.146.192
 
 # Orin Nano 重启 frpc
 ssh nvidia@192.168.1.9 "echo 'nvidia' | sudo -S systemctl restart frpc"

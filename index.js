@@ -68,6 +68,13 @@ const MANAGED_DEVICES = {
     frpcToml: '/opt/frp/frpc.toml',
     restartCmd: 'systemctl restart frpc',
   },
+  deepmemo: {
+    name: 'deepmemo-001 (CIX P1)',
+    prefix: 'deepmemo',
+    ssh: { host: '150.158.146.192', port: 6280, user: 'tianxi' },
+    frpcToml: '/opt/frp/frpc.toml',
+    restartCmd: 'sudo systemctl restart frpc',
+  },
 };
 
 function getDeviceIdByName(tunnelName) {
